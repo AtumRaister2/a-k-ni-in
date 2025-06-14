@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aşkın Tarifi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #fdf5e6;
+            --text-color: #8b5e3c;
+            --title-color: #e57373;
+            --button-color: #ffab91;
+            --button-hover-color: #e57373;
+            --card-bg: #ffffff;
+            --border-color: #f0e4d7;
+            --subtitle-color: #d4a5a5;
+            --shadow-light: rgba(0, 0, 0, 0.1);
+            --shadow-hover: rgba(229, 115, 115, 0.6);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Kalam', cursive;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px var(--shadow-light);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .main-title, .recipe-title {
+            font-family: 'Pacifico', cursive;
+            color: var(--title-color);
+            font-size: 2.2em;
+            margin-bottom: 20px;
+        }
+        .recipe-title {
+            font-size: 2.5em;
+        }
+
+        .emojis {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .recipe-card {
+            text-align: left;
+        }
+
+        .recipe-section h3 {
+            font-family: 'Kalam', cursive;
+            font-weight: 700;
+            font-size: 1.5em;
+            color: var(--subtitle-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+
+        .recipe-section ul, .recipe-section ol {
+            padding-left: 20px;
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 15px 30px;
+            background-color: var(--button-color);
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-family: 'Kalam', cursive;
+            font-weight: 700;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 171, 145, 0.5);
+        }
+
+        .button:hover {
+            background-color: var(--button-hover-color);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px var(--shadow-hover);
+        }
+
+        /* Modal Stilleri */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5); 
+            animation: fadeIn 0.5s;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 15% auto;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            width: 80%;
+            max-width: 450px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            position: relative;
+        }
+        
+        .modal-title {
+            font-family: 'Pacifico', cursive;
+            color: var(--title-color);
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .modal-body {
+            font-size: 1.3em;
+            line-height: 1.6;
+            color: var(--text-color);
+            margin-bottom: 30px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            position: relative; 
+            height: 60px;
+        }
+
+        #noBtn {
+            position: absolute; 
+            transition: all 0.2s ease-out;
+        }
+        
+        /* YENİ EKLENEN KUTLAMA ALANI */
+        #celebration-content {
+            display: none; /* Başlangıçta gizli */
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        #celebration-content img {
+            width: 70%;
+            max-width: 250px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+
+        audio { display: none; }
+    </style>
+</head>
+<body>
+
+<audio id="background-music" src="romantik-piyano.mp3" loop></audio>
+
+<div id="page-intro" class="page active container">
+    <p class="emojis">💌✨</p>
+    <h1 class="main-title">Her şeyin bir başlangıcı vardır... Bizimkinin tarifi burada olabilir mi?</h1>
+    <button data-target="page-recipe1" class="button navigator">Yolculuğa Başla</button>
+</div>
+<div id="page-recipe1" class="page container recipe-card">
+    <h2 class="recipe-title">Tanışma Kurabiyeleri</h2>
+    <div class="recipe-section"><h3>Malzemeler:</h3><ul><li>Bir avuç merak</li><li>İki tatlı kaşığı cesaret</li><li>Bolca kahkaha</li><li>Bir tutam utangaçlık</li></ul></div>
+    <div class="recipe-section"><h3>Yapılışı:</h3><ol><li>Merak ve cesareti nazikçe birbirine karıştır.</li><li>Karışım hafifleyene kadar üzerine kahkaha ekle.</li><li>Sıcak bakışlarla fırında pişir ve samimi bir gülümsemeyle servis yap.</li></ol></div>
+    <button data-target="page-recipe2" class="button navigator">Bir sonraki lezzete geçelim mi?</button>
+</div>
+<div id="page-recipe2" class="page container recipe-card">
+    <h2 class="recipe-title">Güven Keki</h2>
+    <div class="recipe-section"><h3>Malzemeler:</h3><ul><li>Her zaman o tatlılığını koru</li><li>Limitsiz anlayış</li><li>Bir fincan sadakat</li><li>Özenle paylaşılan sırlar</li><li>Zor zamanlarda tam destek</li></ul></div>
+    <div class="recipe-section"><h3>Yapılışı:</h3><ol><li>Sadakat ve anlayışı tam bütünleşene kadar çırp.</li><li>Paylaşılan sırları yavaşça içine ekle.</li><li>Sabırla kabarmasını bekle. Bu kek en güzel, iyi günde ve kötü günde birlikte yenir.</li></ol></div>
+    <button data-target="page-recipe3" class="button navigator">Kedili bir tarifle devam edelim mi?</button>
+</div>
+<div id="page-recipe3" class="page container recipe-card">
+    <p class="emojis">🐱💕🧁</p>
+    <h2 class="recipe-title">Kedi Kalpli Muffinler</h2>
+    <div class="recipe-section"><h3>Malzemeler:</h3><ul><li>Bir çift kedi gözünü andıran bakış</li><li>Miyav sesi kadar yumuşak sözler</li><li>Patisiyle kalbe dokunan bir şefkat</li><li>Sıcacık bir sarılma</li></ul></div>
+    <div class="recipe-section"><h3>Yapılışı:</h3><ol><li>Göz göze geldiğiniz o anı hatırla, içine bir tutam heyecan ekle.</li><li>Kalbinin en derininden gelen miyav gibi sevimli bir iltifat hazırla.</li><li>Sarılmaları fırında ısıt, sıcacık olsun... Tıpkı kediler gibi.</li><li>İlk sen tadına bak, o da sana usulca kuyruğunu sallasın... yani kalbini atsın.</li></ol></div>
+    <button data-target="page-ataturk-love" class="button navigator">Daha anlamlı bir tarife geçelim mi?</button>
+</div>
+<div id="page-ataturk-love" class="page container recipe-card">
+    <p class="emojis">🇹🇷❤️📜</p>
+    <h2 class="recipe-title">İlke ve Aşkla Yoğrulmuş Bir Bağ</h2>
+    <div class="recipe-section"><h3>Malzemeler:</h3><ul><li>Bir tutam Cumhuriyet coşkusu</li><li>Eşitlik ilkesinden ilhamla karşılıklı saygı</li><li>Laiklik gibi saf ve temiz bir sevgi</li><li>Halkçılıkla örülmüş destek</li><li>İnkılapçılıkla her gün yeniden aşık olmak</li></ul></div>
+    <div class="recipe-section"><h3>Yapılışı:</h3><ol><li>Aşkınızı Cumhuriyet gibi temellere oturtun: sağlam, özgür ve eşit.</li><li>Laikliği baz alarak; sevginizi karışıklıktan uzak, sade ve temiz tutun.</li><li>Her gün bir inkılap gibi; yeni güzellikler keşfedin, birbirinize yeniden hayran olun.</li><li>Ve tıpkı Atatürk gibi, birbirinizin değerini bilerek, bu aşkı sonsuza dek yaşatın.</li></ol></div>
+    <button data-target="page-recipe-final" class="button navigator">Ve son tatlıya geçelim...</button>
+</div>
+<div id="page-recipe-final" class="page container recipe-card">
+    <p class="emojis">👨‍🍳🍰💘</p>
+    <h2 class="recipe-title">Bir Ömürlük Aşk</h2>
+    <div class="recipe-section"><h3>Malzemeler:</h3><ul><li>Her güne bir tutam gülümseme</li><li>Saatler dolusu muhabbet</li><li>Bir ömürlük sevgi</li><li>Ve en önemlisi, senin eşsiz tatlılığın...</li></ul></div>
+    <div class="recipe-section"><h3>Yapılışı:</h3><ol><li>Tüm malzemeleri bir kalpte karıştır.</li><li>Her sabah birlikte kahvaltı yaparak pişir.</li><li>Ve birlikte bir ömür boyu tadını çıkar...</li></ol></div>
+    <button id="proposeBtn" class="button">Bu tarifi birlikte denemek ister misin?</button>
+</div>
+
+
+<div id="proposalModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle" class="modal-title">En Önemli Soru...</h2>
+        
+        <div id="modalBody" class="modal-body">
+            Hayatımın en özel ve en güzel tarifini seninle tamamlamak istiyorum...<br><strong>Benimle olur musun? ❤️</strong>
+        </div>
+
+        <div id="celebration-content">
+            <img src="https://via.placeholder.com/400x400/ffe4e1/8b5e3c?text=Bizim+Hikayemiz" alt="Bizim Hikayemiz">
+            <p class="modal-body">İşte bizim hikayemizin ilk sayfası...<br>Ve ben bu hikayenin her satırını seninle yazmak için sabırsızlanıyorum!</p>
+            <a href="https://youtu.be/dwUEy1nFUvU?si=yFAYhCqN8k1MeKet" target="_blank" class="button">Bu da Bizim Şarkımız Olsun mu? 🎶</a>
+        </div>
+
+        <div id="modalButtons" class="modal-buttons">
+            <button id="yesBtn" class="button">EVET!</button>
+            <button id="noBtn" class="button" style="background-color: #f3a6a6;">Hayır</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const backgroundMusic = document.getElementById('background-music');
+
+    document.querySelectorAll('.navigator').forEach(button => {
+        button.addEventListener('click', () => {
+            const currentPage = button.closest('.page');
+            const targetPageId = button.getAttribute('data-target');
+            const targetPage = document.getElementById(targetPageId);
+
+            if (currentPage && targetPage) {
+                currentPage.classList.remove('active');
+                targetPage.classList.add('active');
+            }
+        });
+    });
+
+    // --- Modal Kodları (GÜNCELLENDİ) ---
+    const modal = document.getElementById('proposalModal');
+    const proposeBtn = document.getElementById('proposeBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalButtons = document.getElementById('modalButtons');
+    const celebrationContent = document.getElementById('celebration-content');
+    
+    proposeBtn.addEventListener('click', function () {
+        modal.style.display = "block";
+    });
+
+    // EVET butonuna basınca olacaklar
+    yesBtn.addEventListener('click', function () {
+        // Konfeti efektini başlat
+        var end = Date.now() + (3 * 1000);
+        var colors = ['#e57373', '#ffab91', '#fdf5e6', '#ffffff'];
+
+        (function frame() {
+            confetti({
+                particleCount: 2,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: colors
+            });
+            confetti({
+                particleCount: 2,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: colors
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+
+        // Modal içeriğini değiştir
+        modalTitle.innerText = 'Hikayemiz Başlıyor!';
+        modalBody.style.display = 'none';
+        modalButtons.style.display = 'none';
+        celebrationContent.style.display = 'block';
+    });
+
+    // HAYIR butonunun muzipliği
+    noBtn.addEventListener('mouseover', function () {
+        const modalContent = document.querySelector('.modal-content');
+        const modalRect = modalContent.getBoundingClientRect();
+        
+        const newTop = Math.random() * (modalRect.height - 100) + 20;
+        const newLeft = Math.random() * (modalRect.width - 150) + 20;
+        
+        noBtn.style.top = `${newTop}px`;
+        noBtn.style.left = `${newLeft}px`;
+        noBtn.innerText = 'Ama neden? :(';
+    });
+
+     noBtn.addEventListener('click', function () {
+        // Özel bir modal veya mesaj kutusu kullanın, alert() kullanmayın.
+        // Şimdilik konsola yazdırıyorum.
+        console.log('Yakalandın! Bence bir daha düşün... ;)');
+        // Veya burada özel bir UI modalı tetikleyebilirsiniz.
+        // Örneğin: showCustomMessageBox('Yakalandın! Bence bir daha düşün... ;)');
+    });
+
+    document.body.addEventListener('click', function () {
+        if (backgroundMusic.paused) {
+            backgroundMusic.play().catch(error => {
+                console.log("Müzik çalma işlemi tarayıcı tarafından engellendi.");
+            });
+        }
+    }, { once: true });
+</script>
+</body>
+</html>
